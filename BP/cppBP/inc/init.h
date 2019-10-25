@@ -5,6 +5,9 @@
 #include  <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
+#include <algorithm>
+
 
 /*****项目头哦文件***/
 #include "BPNet.h"

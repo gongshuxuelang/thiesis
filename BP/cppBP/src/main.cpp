@@ -2,6 +2,7 @@
 
 int main()
 {
-
+    BPNet BP;
+    
     return 0;
 }

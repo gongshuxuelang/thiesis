@@ -2,11 +2,11 @@
 
 BPNet::BPNet()  //构造函数
 {
-   // BPNetInit();//初始化BP网络
-   std::cout << "读文件"<<std::endl;
-   BPNetReaddata();
-   std::cout << "打印函数"<< std::endl;
-   BPNetprint(1);
+   BPNetInit();//初始化BP网络
+   //std::cout << "读文件"<<std::endl;
+   //BPNetReaddata();
+   //std::cout << "打印函数"<< std::endl;
+   BPNetprint(0);
 }
 
 BPNet::~BPNet() {}//析构函数
@@ -64,7 +64,7 @@ void BPNet::BPNetInit()
         std::cin >> num;
         LaterNum_n.push_back(num);
     }    
-    LaterNum_n.push_back(1);
+    //LaterNum_n.push_back(1);    
     std::cout << "请输入学习率!" << std::endl;
     std::cin >> StudyRate;
     std::cout << "请输入精度控制!" << std::endl;
@@ -75,13 +75,13 @@ void BPNet::BPNetInit()
     srand(time(NULL));
 
     //初始化中间层矩阵
-    for(int i = 0; i < LayerNum + 1; ++i)
+    for(int i = 0; i < LayerNum; ++i)//中间层循环
     {
        
-        for(int j  = 0; j < LaterNum_n[i] ; ++j)
+        for(int j  = 0; j < LaterNum_n[i] ; ++j)//中间层节点个数循环
         {
             std::vector<double> vm;
-            for(int k = 0; k < LaterNum_n[i+ 1]; ++k)
+            for(int k = 0; k < LaterNum_n[i+ 1]; ++k)//初始化各个节点的权重
             {
                 vm.push_back( rand() / (double)(RAND_MAX));
             }
@@ -91,6 +91,11 @@ void BPNet::BPNetInit()
         V.push_back(v);
         std::vector<std::vector<double> >().swap(v);
     }
+    //初始化输出权重
+    for(int i = 0; i < LaterNum_n[LayerNum]; ++i)
+    {
+        w.push_back(rand() / (double)(RAND_MAX));        
+    }
     return ;
 }
 
@@ -99,10 +104,10 @@ void BPNet::BPNetprint(int n)
     switch (n)
     {
     case 0:
-            //打印权重
-        for(int i = 0; i < LayerNum + 1; ++i)
-        {
-        
+         //打印权重
+        std::cout << "中间层权重"<<std::endl;
+        for(int i = 0; i < LayerNum; ++i)
+        {        
             for(int j  = 0; j < LaterNum_n[i]; ++j)
             {            
                 for(int k = 0; k < LaterNum_n[i + 1]; ++k)
@@ -113,6 +118,13 @@ void BPNet::BPNetprint(int n)
             }
             std::cout << std::endl;
         } 
+        std::cout << "输出层权重"<<std::endl;
+        for(int i = 0; i < LaterNum_n[LayerNum];++i)
+        {
+            std::cout << w[i] << "     ";
+        }
+        std::cout << std::endl;
+
         break;
     
     case 1:

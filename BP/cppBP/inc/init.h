@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <iomanip>//cout输出控制精度
 #include <fstream>  //读文件头文件
-
+#include <string>
 
 /*****项目头哦文件***/
 #include "BPNet.h"

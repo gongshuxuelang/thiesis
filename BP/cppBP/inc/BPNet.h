@@ -16,11 +16,13 @@ class BPNet
     private:
         int LayerNum;			                                                                    //中间层数量
         std::vector<int> LaterNum_n;                                                //中间层节点个数
-        std::vector<std::vector<double> > v;                                    //两层之间的权重矩阵
+        std::vector<std::vector<double> > v;                                    //中间层权重矩阵
+        std::vector<double> w;                                                              //输出层权重
         std::vector<std::vector<std::vector<double> > > V;        //全部的权重矩阵3维数据       
         double StudyRate;		                                                                 //学习率
         double Accuracy;		                                                                   //精度控制参数
         int MaxLoop;			                                                                       //最大循环次数
+        
         std::vector<std::vector<double> >x;                                     //训练数据
         std::vector<double> y;                                                                 //结果
 };

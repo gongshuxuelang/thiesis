@@ -10,10 +10,57 @@ BPNet::BPNet()  //构造函数
 }
 
 BPNet::~BPNet() {}//析构函数
- void  BPNet::BPNetUseBpNet()
- {
+double BPNet::fnet(double net)
+{
+    return 1/(1+exp(-net));
+}
+void  BPNet::BPNetUseBpNet()
+{
+    double e = 0;                                           //误差
+    double temp = 0;                                  //求和数
+    std::vector<double> xg;                    //提取训练数据中间变量
+    std::vector<double> yg;                    //求出中间层的值
+    std::vector<double>outg;                //输出矩阵
+    std::vector<std::vector<std::vector<double> > >vg;//修改中间层矩阵
+    std::vector<double>wg;//修改输出权重矩阵
+    std::vector<std::vector<double> >yout;//中间层输出值矩阵
+    //训练过程
+    for(int num = 0; Accuracy > e && num < MaxLoop; ++num)//拟合次数和精度控制
+    {
+        e = 0;
+        for(int i = 0; i < N_SAMPLE; ++i)   //训练样本数量
+        {
+            for(int ix = 0; ix < LINE; ++ix)    //提取训练数据
+            {
+                xg.push_back(x[i][ix]); 
+            }            
+            for(int j = 0; j < LayerNum;++j)    //中间层
+            {
+                for(int k = 0; k < LaterNum_n[j + 1]; ++k)//中间层节点个数
+                {
+                    temp = 0; //求和
+                    for(int m = 0; m < LaterNum_n[j]; ++m)  //计算每一层的输出值
+                    {
+                        temp += xg[m] * V[j][m][k];
+                    }
+                   yg.push_back(fnet(temp));
+                }
+                std::vector<double>().swap(xg); // 释放中间值
+                xg = yg;                                                    //输出转输入
+            }
+            temp = 0;
+            for(int j = 0; j < LaterNum_n[LayerNum];++j)//求输出值
+            {
+                temp += xg[j] * w[j]; 
+            }
+            outg.push_back(fnet(temp));             //记录输出值
 
- }
+            //以下部分反向拟合,调整参数
+
+
+        }
+    }
+}
 
 void BPNet::BPNetTrainBpNet()
 {
@@ -76,12 +123,11 @@ void BPNet::BPNetInit()
 
     //初始化中间层矩阵
     for(int i = 0; i < LayerNum; ++i)//中间层循环
-    {
-       
+    {       
         for(int j  = 0; j < LaterNum_n[i] ; ++j)//中间层节点个数循环
         {
             std::vector<double> vm;
-            for(int k = 0; k < LaterNum_n[i+ 1]; ++k)//初始化各个节点的权重
+            for(int k = 0; k < LaterNum_n[i + 1]; ++k)//初始化各个节点的权重
             {
                 vm.push_back( rand() / (double)(RAND_MAX));
             }

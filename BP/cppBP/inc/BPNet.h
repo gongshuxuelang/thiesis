@@ -13,6 +13,7 @@ class BPNet
         void BPNetprint(int n);                                                              //BP网络打印函数 
         void BPNetTrainBpNet();                                                         //BP网络训练函数
         void  BPNetUseBpNet();                                                          //测验函数
+        double fnet(double net);                                                        //激活函数
     private:
         int LayerNum;			                                                                    //中间层数量
         std::vector<int> LaterNum_n;                                                //中间层节点个数

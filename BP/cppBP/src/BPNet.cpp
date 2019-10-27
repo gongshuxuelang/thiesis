@@ -3,10 +3,12 @@
 BPNet::BPNet()  //构造函数
 {
    BPNetInit();//初始化BP网络
-   //std::cout << "读文件"<<std::endl;
-   //BPNetReaddata();
-   //std::cout << "打印函数"<< std::endl;
+   std::cout << "读文件"<<std::endl;
+   BPNetReaddata();
+   std::cout << "打印函数"<< std::endl;
    BPNetprint(0);
+   BPNetprint(1);
+   BPNetTrainBpNet();
 }
 
 BPNet::~BPNet() {}//析构函数
@@ -15,6 +17,11 @@ double BPNet::fnet(double net)
     return 1/(1+exp(-net));
 }
 void  BPNet::BPNetUseBpNet()
+{
+
+}
+
+void BPNet::BPNetTrainBpNet()
 {
     double e = 0;                                           //误差
     double temp = 0;                                  //求和数
@@ -47,6 +54,7 @@ void  BPNet::BPNetUseBpNet()
                 }
                 std::vector<double>().swap(xg); // 释放中间值
                 xg = yg;                                                    //输出转输入
+                std::vector<double>().swap(yg); // 释放中间值
             }
             temp = 0;
             for(int j = 0; j < LaterNum_n[LayerNum];++j)//求输出值
@@ -54,17 +62,17 @@ void  BPNet::BPNetUseBpNet()
                 temp += xg[j] * w[j]; 
             }
             outg.push_back(fnet(temp));             //记录输出值
-
+            std::vector<double>().swap(xg); // 释放中间值
+            std::vector<double>().swap(yg); // 释放中间值
             //以下部分反向拟合,调整参数
-
-
         }
+        //测试BP网络输出
+        for(int i = 0;i < N_SAMPLE; ++ i)
+        {
+            std::cout << outg[i] << "  ";
+        }
+        std::cout << std::endl;
     }
-}
-
-void BPNet::BPNetTrainBpNet()
-{
-
 }
 
 void BPNet::BPNetReaddata()
@@ -72,7 +80,9 @@ void BPNet::BPNetReaddata()
      double d = 0;      //读文件中间变量
     std::vector<std::vector<double> >xm(LENGTH,std::vector<double>(LINE));//中间变量存训练集数据
     std::vector<double> ym;                                                                                                     //中间变量存训练集数据
-    std::ifstream ifstr_data("./data/Lable_guiyihua.txt",std::ios::in);                     //读文件,路径一定要是make文件的相对路径
+    //std::ifstream ifstr_data("./data/Lable_guiyihua.txt",std::ios::in);                     //读文件,路径一定要是make文件的相对路径
+    //测试用数
+    std::ifstream ifstr_data("./data/1.txt",std::ios::in);     
     if(!ifstr_data)
     {
         std::cout << "打开文件失败!" << std::endl;

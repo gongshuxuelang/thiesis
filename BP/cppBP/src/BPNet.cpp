@@ -12,6 +12,16 @@ BPNet::BPNet()  //构造函数
 }
 
 BPNet::~BPNet() {}//析构函数
+int BPNet::yuzhi(double num)
+{
+    if(1 > num && num > YZ)
+    {
+        return 1;
+    }else if(0 < num && num < YZ)
+    {
+        return 0;
+    }    
+}
 double BPNet::fnet(double net)
 {
     return 1/(1+exp(-net));
@@ -23,14 +33,19 @@ void  BPNet::BPNetUseBpNet()
 
 void BPNet::BPNetTrainBpNet()
 {
-    double e = 0;                                           //误差
+    double e = 0;                                           //误差  
+    double wh = 0;
     double temp = 0;                                  //求和数
     std::vector<double> xg;                    //提取训练数据中间变量
     std::vector<double> yg;                    //求出中间层的值
     std::vector<double>outg;                //输出矩阵
-    std::vector<std::vector<std::vector<double> > >vg;//修改中间层矩阵
-    std::vector<double>wg;//修改输出权重矩阵
     std::vector<std::vector<double> >yout;//中间层输出值矩阵
+    std::vector<std::vector<std::vector<double> > >y3out;//中间变量输出值
+    std::vector<double>vyyg;                        //中间层修改值一维
+    std::vector<std::vector<double> >vyg;//中间层修改值二维
+    std::vector<std::vector<std::vector<double> > >vg;//修改中间层矩阵三维总体
+    std::vector<double>wg;//修改输出权重矩阵
+    std::vector<double>whg;//修改输出权重矩阵
     //训练过程
     for(int num = 0; Accuracy > e && num < MaxLoop; ++num)//拟合次数和精度控制
     {
@@ -41,38 +56,94 @@ void BPNet::BPNetTrainBpNet()
             {
                 xg.push_back(x[i][ix]); 
             }            
-            for(int j = 0; j < LayerNum;++j)    //中间层
+            for(int j = 0; j < LayerNum;++j)    //求中间层输出值
             {
                 for(int k = 0; k < LaterNum_n[j + 1]; ++k)//中间层节点个数
                 {
                     temp = 0; //求和
                     for(int m = 0; m < LaterNum_n[j]; ++m)  //计算每一层的输出值
-                    {
+                    {         
                         temp += xg[m] * V[j][m][k];
-                    }
+                    }                   
                    yg.push_back(fnet(temp));
                 }
                 std::vector<double>().swap(xg); // 释放中间值
-                xg = yg;                                                    //输出转输入
+                xg = yg;    
+                yout.push_back(yg);                                              //输出转输入
                 std::vector<double>().swap(yg); // 释放中间值
-            }
+            }    
             temp = 0;
             for(int j = 0; j < LaterNum_n[LayerNum];++j)//求输出值
             {
                 temp += xg[j] * w[j]; 
             }
-            outg.push_back(fnet(temp));             //记录输出值
+            outg.push_back(yuzhi(fnet(temp)));             //记录输出值
             std::vector<double>().swap(xg); // 释放中间值
             std::vector<double>().swap(yg); // 释放中间值
-            //以下部分反向拟合,调整参数
+            
+          if(outg[i] == y[i])
+          {
+              continue;
+          }
+         //以下部分反向拟合,调整参数
+        //输出层调参
+            for(int j = 0; j < LaterNum_n[LayerNum]; ++j)
+            {
+                wg.push_back(StudyRate * (fnet(temp) -  y[i]) * fnet(temp) * (1 - fnet(temp)) * yout[yout.size() - 1][j]);
+            }
+            //中间层参数调整
+            
+            for(int j = 1; j <= LayerNum; ++j)
+            {                
+                for(int k = 0; k < LaterNum_n[LayerNum - j]; ++k)
+                {
+                    for(int m = 0; m < LaterNum_n[LayerNum -j + 1]; ++m)
+                    {
+                        for(int q = 0; q < LaterNum_n[LayerNum - j + 1]; ++q)
+                        {
+                            if(m == 0)
+                            {
+                                wh += (fnet(temp) -  y[i]) * fnet(temp) * (1 - fnet(temp)) * w[q];
+                            }else{
+                                wh += (fnet(temp) -  y[i]) * fnet(temp) * (1 - fnet(temp)) * V[LayerNum - j][k][q] ;
+                            }                            
+                        }
+                        if(LayerNum - j - 1 >= 0)
+                        {
+                            vyyg.push_back(StudyRate * wh * yout[yout.size() - j][m] *(1 - yout[LayerNum - j][m]) * yout[LayerNum -  j - 1][m] );
+                        }else{
+                            vyyg.push_back(StudyRate * wh * yout[yout.size() - j][m] *(1 - yout[yout.size() - j][m]) * x[i][m] );
+                        }     
+                        wh = 0;                   
+                    }
+                    vyg.push_back(vyyg);
+                    std::vector<double>().swap(vyyg);
+                }
+                vg.push_back(vyg);
+                std::vector<std::vector<double> >().swap(vyg);
+            }
+            //修正输出矩阵
+            for(int j = 0; j < LaterNum_n[LayerNum]; ++ j)
+            {
+                w[j] += wg[j];
+            }
+            //修正中间矩阵
+            for(int j = 0; j < LayerNum; ++ j)
+            {
+                for(int k = 0; k < LaterNum_n[LayerNum - k - 1]; ++k)
+                {
+                    for(int m = 0; m < LaterNum_n[LayerNum - k]; ++m)
+                    {
+                        V[j][k][m] += vg[LayerNum - j - 1][k][m];
+                    }
+                }
+            }
+            std::vector<std::vector<std::vector<double> > >().swap(vg);
         }
-        //测试BP网络输出
-        for(int i = 0;i < N_SAMPLE; ++ i)
-        {
-            std::cout << outg[i] << "  ";
-        }
-        std::cout << std::endl;
+
+        std::cout << "训练" <<  num << "次"<< std::endl;
     }
+    std::cout << "BP网络训练结束" << std::endl;
 }
 
 void BPNet::BPNetReaddata()
@@ -111,6 +182,8 @@ void BPNet::BPNetReaddata()
 
 void BPNet::BPNetInit()
 {
+    std::cout << "请输入阈值!" << std::endl;
+    std::cin >> YZ;
     std::cout << "请输入中间层数量!" << std::endl;
     std::cin >> LayerNum;
     std::cout << "请输入中间层节点个数!" << std::endl;

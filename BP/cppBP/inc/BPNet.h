@@ -14,8 +14,10 @@ class BPNet
         void BPNetTrainBpNet();                                                         //BP网络训练函数
         void  BPNetUseBpNet();                                                          //测验函数
         double fnet(double net);                                                        //激活函数
+        int yuzhi(double num);
     private:
         int LayerNum;			                                                                    //中间层数量
+        double YZ;
         std::vector<int> LaterNum_n;                                                //中间层节点个数
         std::vector<std::vector<double> > v;                                    //中间层权重矩阵
         std::vector<double> w;                                                              //输出层权重

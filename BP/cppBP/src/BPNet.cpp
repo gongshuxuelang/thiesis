@@ -1,26 +1,11 @@
 #include "init.h"
 
-BPNet::BPNet()  //构造函数
-{
-   BPNetInit();//初始化BP网络
-   std::cout << "读文件"<<std::endl;
-   BPNetReaddata();
-   std::cout << "打印函数"<< std::endl;
-   BPNetprint(0);
-   BPNetprint(1);
-   BPNetTrainBpNet();
-}
-
+BPNet::BPNet(){}  //构造函数
 BPNet::~BPNet() {}//析构函数
+
 int BPNet::yuzhi(double num)
 {
-    if(1 > num && num > YZ)
-    {
-        return 1;
-    }else if(0 < num && num < YZ)
-    {
-        return 0;
-    }    
+    return 1 > num && num > YZ ? 1 : 0;    
 }
 double BPNet::fnet(double net)
 {
@@ -28,7 +13,47 @@ double BPNet::fnet(double net)
 }
 void  BPNet::BPNetUseBpNet()
 {
-
+    double output;
+    double InNum = 0;
+    double temp = 0;
+    std::vector<double> Input;
+    std::vector<double> yg;                    //求出中间层的值
+    std::vector<double> xg;                    //求出中间层的值
+    while(1)
+    {
+        for(int i = 0; i < N_IN; ++i)
+        {
+            std::cin >> InNum;
+            Input.push_back(InNum);
+        }
+        xg = Input;
+        std::vector<double>().swap(Input);
+        //计算中间值
+        for(int i = 0; i < LayerNum; ++i)
+        {
+            for(int j  = 0; j < LaterNum_n[i + 1]; ++j)
+            {
+                temp = 0;
+                for(int k = 0; k < LaterNum_n[i]; ++k)
+                {
+                   temp += xg[k] * V[i][k][j];                    
+                }
+                std::vector<double>().swap(xg);
+                yg.push_back(fnet(temp));
+                xg = yg;
+                std::vector<double>().swap(yg);
+            }
+        }
+        output = 0;
+        temp = 0;
+        for(int i = 0;i < LaterNum_n[LayerNum]; ++i)
+        {   
+            temp += xg[i] * w[i];        
+        }
+        output = yuzhi(fnet(temp));
+        std::cout << "输出值为:" << output << std::endl;
+    }
+    return;
 }
 
 void BPNet::BPNetTrainBpNet()
@@ -79,7 +104,7 @@ void BPNet::BPNetTrainBpNet()
             }
             outg.push_back(yuzhi(fnet(temp)));             //记录输出值
             std::vector<double>().swap(xg); // 释放中间值
-            std::vector<double>().swap(yg); // 释放中间值
+            
             
           if(outg[i] == y[i])
           {
@@ -121,6 +146,7 @@ void BPNet::BPNetTrainBpNet()
                 }
                 vg.push_back(vyg);
                 std::vector<std::vector<double> >().swap(vyg);
+               
             }
             //修正输出矩阵
             for(int j = 0; j < LaterNum_n[LayerNum]; ++ j)
@@ -138,9 +164,10 @@ void BPNet::BPNetTrainBpNet()
                     }
                 }
             }
+            std::vector<double>().swap(wg);
+            std::vector<std::vector<double> >().swap(yout);
             std::vector<std::vector<std::vector<double> > >().swap(vg);
         }
-
         std::cout << "训练" <<  num << "次"<< std::endl;
     }
     std::cout << "BP网络训练结束" << std::endl;
@@ -151,9 +178,9 @@ void BPNet::BPNetReaddata()
      double d = 0;      //读文件中间变量
     std::vector<std::vector<double> >xm(LENGTH,std::vector<double>(LINE));//中间变量存训练集数据
     std::vector<double> ym;                                                                                                     //中间变量存训练集数据
-    //std::ifstream ifstr_data("./data/Lable_guiyihua.txt",std::ios::in);                     //读文件,路径一定要是make文件的相对路径
+    std::ifstream ifstr_data("./data/Lable_guiyihua.txt",std::ios::in);                     //读文件,路径一定要是make文件的相对路径
     //测试用数
-    std::ifstream ifstr_data("./data/1.txt",std::ios::in);     
+    //std::ifstream ifstr_data("./data/1.txt",std::ios::in);     
     if(!ifstr_data)
     {
         std::cout << "打开文件失败!" << std::endl;
